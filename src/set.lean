@@ -6,7 +6,7 @@ theorem Exists.impNot {p q : α → Prop} : (∃ x, p x → ¬ q x) ↔ ∃ x, �
   intro h
   cases h with | intro x hx => 
   { exact ⟨ x, λ hs => hx hs.1 hs.2 ⟩ }
-  intro h
+  intro h 
   cases h with | intro x hx => 
   { exact ⟨ x, λ hpx hqx => hx <| And.intro hpx hqx ⟩ }
 
@@ -17,7 +17,12 @@ theorem contrapositive {p q : Prop} : (¬ q → ¬ p) → p → q :=
     | Or.inl h => h
     | Or.inr h => False.elim <| hqp h hp
   
-theorem notNot {p : Prop} : ¬ ¬ p ↔ p := sorry
+theorem notNot {p : Prop} : ¬ ¬ p ↔ p := by 
+  apply Iff.intro
+  { intro hp; cases em p with 
+    | inl   => assumption
+    | inr h => exact False.elim <| hp h }
+  { exact λ hp hnp => False.elim <| hnp hp }
 
 theorem notForall {p : α → Prop} : (¬ ∀ x, p x) → ∃ x, ¬ p x := by 
   { apply contrapositive; intro hx; rw notNot; intro x;
@@ -28,11 +33,8 @@ theorem notAnd {p q : Prop} : p ∧ ¬ q ↔ ¬ (p → q) := by
   apply Iff.intro
   { exact λ h himp => h.2 <| himp h.1 }
   { intro h; apply And.intro;
-    { revert h;
-      apply contrapositive;
-      rw notNot;
-      intro hnp hp;
-      exact False.elim <| hnp hp }
+    { revert h; apply contrapositive; rw notNot;
+      exact λ hnp hp => False.elim <| hnp hp }
     { exact λ hq => h <| λ _ => hq } }
 
 theorem Exists.notAnd {p q : α → Prop} : 
